@@ -1,0 +1,19 @@
+version: '3.3'
+
+services:
+  ms:
+    container_name: "microservice"
+    build:
+      context: ..
+      dockerfile: ./images/Dockerfile
+    ports:
+      - "8081:8081"
+  db:
+    image: mysql
+    container_name: "db"
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      MYSQL_ROOT_PASSWORD: example
