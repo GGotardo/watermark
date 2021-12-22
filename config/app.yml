@@ -1,5 +1,6 @@
 server:
-  port: 8080
+  http: 8081
+  grpc: 8082
 
 database:
   dbname:

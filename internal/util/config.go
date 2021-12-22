@@ -13,7 +13,8 @@ type Configurations struct {
 
 // ServerConfigurations exported
 type ServerConfigurations struct {
-	Port int
+	Http int
+	Grpc int
 }
 
 // DatabaseConfigurations exported
@@ -34,7 +35,7 @@ func LoadConfig(path string) (config Configurations, err error) {
 
 	err = viper.ReadInConfig()
 	if err != nil {
-		return
+		return Configurations{}, err
 	}
 
 	err = viper.Unmarshal(&config)

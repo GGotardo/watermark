@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	pb "go-watermark/api/v1/pb/watermark"
@@ -20,20 +21,22 @@ import (
 	"google.golang.org/grpc"
 )
 
-const (
-	defaultHTTPPort = "8081"
-	defaultGRPCPort = "8082"
-)
-
 func main() {
-	var (
-		logger   log.Logger
-		httpAddr = net.JoinHostPort("0.0.0.0", envString("HTTP_PORT", defaultHTTPPort))
-		grpcAddr = net.JoinHostPort("0.0.0.0", envString("GRPC_PORT", defaultGRPCPort))
-	)
+	var logger log.Logger
 
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+
+	config, err := util.LoadConfig("./config")
+	if err != nil {
+		_ = logger.Log("config_error", err)
+		os.Exit(1)
+	}
+
+	var (
+		httpAddr = net.JoinHostPort("0.0.0.0", strconv.Itoa(config.Server.Http))
+		grpcAddr = net.JoinHostPort("0.0.0.0", strconv.Itoa(config.Server.Grpc))
+	)
 
 	var (
 		service     = watermark.NewService()
@@ -41,12 +44,6 @@ func main() {
 		httpHandler = transport.NewHTTPHandler(eps)
 		grpcServer  = transport.NewGRPCServer(eps)
 	)
-
-	config, err := util.LoadConfig("./config")
-	if err != nil {
-		_ = logger.Log("config_error", err)
-		os.Exit(1)
-	}
 
 	fmt.Printf("Config: %+v\n", config)
 
